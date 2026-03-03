@@ -56,3 +56,48 @@ class Budget(Base):
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     user = relationship("User", back_populates="budgets")
     __table_args__ = (UniqueConstraint("user_id", "category", name="uq_user_budget_category"),)
+
+
+class Car(Base):
+    __tablename__ = "cars"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), index=True)
+
+    # core identity
+    make: Mapped[str] = mapped_column(String(60), nullable=False)     # e.g., Toyota
+    model: Mapped[str] = mapped_column(String(60), nullable=False)    # e.g., Camry
+    year: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # optional details
+    trim: Mapped[str] = mapped_column(String(60), default="")
+    vin: Mapped[str] = mapped_column(String(32), default="")          # optional, not always stored
+    nickname: Mapped[str] = mapped_column(String(60), default="")
+
+    # ownership/financing snapshot
+    purchase_price: Mapped[float] = mapped_column(Float, default=0.0)
+    down_payment: Mapped[float] = mapped_column(Float, default=0.0)
+    loan_apr: Mapped[float] = mapped_column(Float, default=0.0)
+    loan_term_months: Mapped[int] = mapped_column(Integer, default=0)
+    current_mileage: Mapped[int] = mapped_column(Integer, default=0)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="cars")
+    expenses = relationship("CarExpense", back_populates="car", cascade="all, delete-orphan")
+
+
+class CarExpense(Base):
+    __tablename__ = "car_expenses"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), index=True)
+    car_id: Mapped[int] = mapped_column(Integer, ForeignKey("cars.id"), index=True)
+
+    # examples: fuel, insurance, maintenance, repairs, registration, parking, tolls
+    category: Mapped[str] = mapped_column(String(40), nullable=False, default="maintenance")
+    amount: Mapped[float] = mapped_column(Float, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    notes: Mapped[str] = mapped_column(Text, default="")
+
+    car = relationship("Car", back_populates="expenses")
