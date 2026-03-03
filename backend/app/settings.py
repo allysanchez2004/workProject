@@ -11,6 +11,15 @@ class Settings(BaseSettings):
 
     cors_origins: str = Field(default="http://localhost:19006,http://localhost:8081", alias="CORS_ORIGINS")
     database_url: str = Field(default="sqlite:///./mypiggybank.db", alias="DATABASE_URL")
+    # settings.py additions
+
+    jwt_issuer: str = Field(default="mypiggybankmobile", alias="JWT_ISSUER")
+    jwt_audience: str = Field(default="mypiggybankmobile-users", alias="JWT_AUDIENCE")
+    
+    refresh_jwt_secret: str = Field(default="change-me-refresh", alias="REFRESH_JWT_SECRET")
+    refresh_token_expire_days: int = Field(default=14, alias="REFRESH_TOKEN_EXPIRE_DAYS")
+    
+    jwt_leeway_seconds: int = Field(default=30, alias="JWT_LEEWAY_SECONDS")
 
     @property
     def cors_list(self) -> List[str]:
